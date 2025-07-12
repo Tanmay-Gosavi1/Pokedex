@@ -3,26 +3,30 @@ import React, { useEffect, useState } from 'react'
 import Pokemons from './Pokemons'
 
 const PokeCard = () => {
+    const [pokeApi,setPokeApi] = useState("https://pokeapi.co/api/v2/pokemon")
+    const [pokemons , setPokemons] = useState([])
+    const [nextUrl , setNextUrl] = useState('')
+    const [prevUrl , setPrevUrl] = useState('')
+
     useEffect(()=>{
         fetchCurrData()
-    },[])
-    const pokeApi = "https://pokeapi.co/api/v2/pokemon"
-    const [pokemons , setPokemons] = useState([])
-    
+    },[pokeApi])
+
     const fetchCurrData = async ()=>{
-        const poke = await axios.get(pokeApi)
-        const pokeData  = poke.data 
-        const pokeDataResults = pokeData.results
-        const  indiviualPokeData = pokeDataResults.map(ele=>axios.get(ele.url))
-        const pokemonData = await axios.all(indiviualPokeData)
-        const res = pokemonData.map(ele=>{
+        const poke = await axios.get(pokeApi) //this downloads the list of 20 pokemons
+        setNextUrl(poke.data.next)
+        setPrevUrl(poke.data.previous)
+        const pokeDataResults = poke.data.results  //this gives array of name and url of  pokemons
+        const indiviualPokeData = pokeDataResults.map(ele=>axios.get(ele.url))  //From their indiviual urls , we get array of promises
+        const pokemonData = await axios.all(indiviualPokeData)  //Wait till all promises get fulfilled
+        const res = pokemonData.map(ele=>{     //Mapped through each pokemon to get their info
             return {
                 id : ele.data.id ,
                 name : ele.data.name ,
                 image : ele.data.sprites.other.dream_world.front_default ? ele.data.sprites.other.dream_world.front_default :  ele.data.sprites.back_shiny
             }
         })
-        setPokemons(res)
+        setPokemons(res)    
     }
   return (
     <>
@@ -34,8 +38,8 @@ const PokeCard = () => {
             }
         </div>
         <div className='flex space-x-5'>
-            <button className='px-8 py-2 text-sm text-white font-bold text-center bg-[#413f3f4f] rounded-md cursor-pointer'>Previous</button>
-            <button className='px-8 py-2 text-sm text-white font-bold text-center bg-[#413f3f4f] rounded-md cursor-pointer'>Next</button>
+            <button disabled={prevUrl==null} onClick={()=>setPokeApi(prevUrl)} className='px-8 py-2 text-sm text-white font-bold text-center bg-[#413f3f4f] rounded-md cursor-pointer'>Previous</button>
+            <button disabled={nextUrl==undefined} onClick={()=>setPokeApi(nextUrl)} className='px-8 py-2 text-sm text-white font-bold text-center bg-[#413f3f4f] rounded-md cursor-pointer'>Next</button>
         </div>
     </>
   )
