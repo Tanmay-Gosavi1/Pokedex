@@ -7,6 +7,7 @@ const PokeCard = () => {
     const [pokemons , setPokemons] = useState([])
     const [nextUrl , setNextUrl] = useState('')
     const [prevUrl , setPrevUrl] = useState('')
+    const [isLoading , setIsLoading] = useState(true)
 
     useEffect(()=>{
         fetchCurrData()
@@ -27,9 +28,13 @@ const PokeCard = () => {
             }
         })
         setPokemons(res)    
+        setIsLoading(false)
     }
   return (
-    <>
+    <>  
+    {
+        isLoading ? <h1 className='text-2xl text-white p-20 text-center font-bold'>Loading...</h1> : ""
+    }
         <div className='flex flex-wrap justify-center items-center gap-5 pt-20 pb-15 px-10'>
             {
                 pokemons.map((ele,idx)=>{
